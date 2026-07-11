@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Campus Attendance App — Setup Guide
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## What's in this zip
+```
+app/
+  page.tsx            -> Login page (entry point)
+  layout.tsx           -> Root layout, loads global styles + PWA manifest
+  globals.css           -> Tailwind styles
+  student/page.tsx     -> Student dashboard (view-only)
+  teacher/page.tsx     -> Teacher dashboard (mark attendance)
+  seed/page.tsx         -> One-time helper page to add sample data
+lib/
+  firebase.js           -> Connects the app to your Firestore database
+  constants.js           -> Subjects list, passwords, eligibility threshold
+  attendance.js          -> Functions that calculate attendance percentages
+public/
+  manifest.json          -> Makes the app installable on phones (PWA)
+  icon-192.png, icon-512.png -> Placeholder app icons (swap for your campus logo)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How to install this into your existing project
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Unzip this file.
+2. Copy the `app`, `lib`, and `public` folders into your existing
+   `attendance-app` project folder, **overwriting** files with the same name
+   when asked. Your `node_modules` and `package.json` are untouched.
+3. In your project terminal, make sure the dev server is running:
+   ```
+   npm run dev
+   ```
+4. Open `http://localhost:3000/seed` in your browser and click
+   **"Seed Sample Data"** — this adds sample students and teachers into
+   your Firestore database (only do this once).
+5. Go to `http://localhost:3000` and log in with:
+   - Student: ID `101`, `102`, or `103`, password `student123`
+   - Teacher: ID `T1` or `T2`, password `teacher123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How the app works (short version)
 
-## Learn More
+- **Login (`app/page.tsx`)**: takes an ID + password, checks the `students`
+  collection first, then the `teachers` collection in Firestore. If a match
+  is found and the password is correct, it saves the role/ID/name in the
+  browser's `localStorage` and redirects to the right dashboard.
+- **Teacher dashboard**: teacher picks a subject + date, sees the student
+  list defaulted to "Present," taps anyone who's absent, then saves. This
+  writes one document to the `attendance` collection per subject+date.
+- **Student dashboard**: reads every `attendance` document for each subject,
+  counts how many times the logged-in student was marked present vs total
+  classes, and calculates a percentage. If it's below 60%, the student is
+  marked "Not eligible."
+- **PWA (`manifest.json`)**: tells the phone browser this app can be
+  "installed" with an icon on the home screen, so it behaves a bit like a
+  native app.
 
-To learn more about Next.js, take a look at the following resources:
+## To use your own campus logo
+Replace `public/icon-192.png` and `public/icon-512.png` with your logo
+(same file names, ideally square images). You can also add your campus
+name into the login page title in `app/page.tsx`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Adding real students/teachers later
+Either:
+- Edit the sample list inside `app/seed/page.tsx` and visit `/seed` again, or
+- Add documents directly in the Firebase Console under the `students` and
+  `teachers` collections, matching the same field names (`studentId`,
+  `name` / `teacherId`, `name`, `subjects`).
