@@ -145,7 +145,7 @@ export default function StudentPage() {
                       </p>
                     ) : (
                       <ul className="space-y-1">
-                        {stats.history.map((entry, idx) => (
+                        {stats.history.map((entry: any, idx: number) => (
                           <li
                             key={idx}
                             className="flex justify-between text-sm"
