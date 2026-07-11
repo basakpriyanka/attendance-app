@@ -18,11 +18,11 @@ export default function TeacherPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [subject, setSubject] = useState(SUBJECTS[0]);
   const [date, setDate] = useState(todayString());
   // statusMap: { studentId: "present" | "absent" }
-  const [statusMap, setStatusMap] = useState({});
+  const [statusMap, setStatusMap] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
 
@@ -54,7 +54,7 @@ export default function TeacherPage() {
 
   // If attendance for this subject+date was already marked earlier today,
   // load it so the teacher can review/edit instead of starting blank.
-  async function loadExistingAttendance(subj, dt) {
+  async function loadExistingAttendance(subj: string, dt: string) {
     const docId = `${subj}_${dt}`;
     const existing = await getDoc(doc(db, "attendance", docId));
 
@@ -62,7 +62,7 @@ export default function TeacherPage() {
       setStatusMap(existing.data().records || {});
     } else {
       // Default: mark everyone present, teacher only taps the absentees
-      const defaults = {};
+      const defaults: Record<string, string> = {};
       students.forEach((s) => {
         defaults[s.studentId] = "present";
       });
@@ -71,7 +71,7 @@ export default function TeacherPage() {
     setSavedMessage("");
   }
 
-  function toggleStudent(studentId) {
+  function toggleStudent(studentId: string) {
     setStatusMap((prev) => ({
       ...prev,
       [studentId]: prev[studentId] === "present" ? "absent" : "present",
@@ -79,7 +79,7 @@ export default function TeacherPage() {
   }
 
   function markAllPresent() {
-    const all = {};
+    const all: Record<string, string> = {};
     students.forEach((s) => {
       all[s.studentId] = "present";
     });

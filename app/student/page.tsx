@@ -12,9 +12,9 @@ export default function StudentPage() {
   const [name, setName] = useState("");
   const [studentId, setStudentId] = useState("");
   const [loading, setLoading] = useState(true);
-  const [subjectStats, setSubjectStats] = useState({});
-  const [overall, setOverall] = useState(null);
-  const [expandedSubject, setExpandedSubject] = useState(null);
+  const [subjectStats, setSubjectStats] = useState<Record<string, any>>({});
+  const [overall, setOverall] = useState<any>(null);
+  const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -31,8 +31,8 @@ export default function StudentPage() {
     loadAttendance(id);
   }, []);
 
-  async function loadAttendance(id) {
-    const statsMap = {};
+  async function loadAttendance(id: string) {
+    const statsMap: Record<string, any> = {};
 
     for (const subject of SUBJECTS) {
       const attendanceQuery = query(
