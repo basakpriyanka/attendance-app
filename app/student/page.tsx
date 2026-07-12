@@ -133,6 +133,56 @@ export default function StudentPage() {
             No attendance recorded yet.
           </p>
         ) : (
+          <>
+            {(() => {
+              const totalClasses = subjectCards.reduce(
+                (sum, c) => sum + c.totalClasses,
+                0
+              );
+              const totalPresent = subjectCards.reduce(
+                (sum, c) => sum + c.presentCount,
+                0
+              );
+              const overallPercentage =
+                totalClasses === 0
+                  ? 100
+                  : Math.round((totalPresent / totalClasses) * 100);
+              const overallEligible =
+                overallPercentage >= 60 &&
+                subjectCards.every((c) => c.eligible);
+
+              return (
+                <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Overall attendance
+                      </p>
+                      <p className="text-3xl font-bold text-gray-800">
+                        {overallPercentage}%
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
+                        overallEligible
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {overallEligible
+                        ? "✅ Eligible for exam"
+                        : "❌ Not eligible"}
+                    </span>
+                  </div>
+                  {!overallEligible && (
+                    <p className="text-xs text-red-500 mt-2">
+                      You're below 60% in at least one subject. Check the
+                      breakdown below.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
           <div className="space-y-3">
             {subjectCards.map((card) => {
               const isExpanded = expanded === card.key;
@@ -151,15 +201,16 @@ export default function StudentPage() {
                         {card.presentCount}/{card.totalClasses} classes attended
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                        className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${
                           card.eligible
                             ? "bg-green-100 text-green-700"
                             : "bg-red-100 text-red-700"
                         }`}
                       >
-                        {card.percentage}%
+                        {card.percentage}% &middot;{" "}
+                        {card.eligible ? "Eligible" : "Not eligible"}
                       </span>
                       <span className="text-gray-400 text-sm">
                         {isExpanded ? "▲" : "▼"}
@@ -203,7 +254,8 @@ export default function StudentPage() {
                 </div>
               );
             })}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>
