@@ -44,23 +44,24 @@ export default function StudentPage() {
 
     const studentData = studentSnapshot.docs[0].data();
     const studentGroup = studentData.group || "";
+    const studentSemester = studentData.semester || "";
     setGroup(studentGroup);
 
-    // "1.AR" -> teacher code is the part after the dot
-    const teacherCode = studentGroup.split(".")[1] || "";
-
+    // Every attendance session held for this student's semester --
+    // regardless of which teacher ran it -- may include this student.
     const attendanceQuery = query(
       collection(db, "attendance"),
-      where("teacherId", "==", teacherCode)
+      where("semester", "==", studentSemester)
     );
     const snapshot = await getDocs(attendanceQuery);
 
-    // Group attendance documents by "semester - subject" so a student
-    // sees separate stats for each course a teacher has run for them.
+    // Group attendance documents by "teacher - subject" so a student
+    // sees separate stats for each course/teacher combination.
     const groups: Record<string, any[]> = {};
     snapshot.docs.forEach((docSnap) => {
       const data = docSnap.data();
-      const key = `${data.semester} semester - ${data.subject}`;
+      if (!data.records || data.records[id] === undefined) return;
+      const key = `${data.subject} (${data.teacherId})`;
       if (!groups[key]) groups[key] = [];
       groups[key].push(data);
     });

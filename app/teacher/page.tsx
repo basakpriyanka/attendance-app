@@ -50,15 +50,14 @@ export default function TeacherPage() {
     }
   }, [date, students]);
 
-  // Students whose group ends with this teacher's code AND whose
-  // semester matches the one chosen at login.
+  // All students in the semester the teacher selected at login --
+  // not filtered by group, since a subject class includes the whole
+  // semester regardless of project group.
   async function loadStudents(code: string, sem: string) {
     const snapshot = await getDocs(collection(db, "students"));
     const list = snapshot.docs
       .map((d) => d.data())
-      .filter(
-        (s: any) => s.group && s.group.endsWith("." + code) && s.semester === sem
-      );
+      .filter((s: any) => s.semester === sem);
     list.sort((a: any, b: any) => a.studentId.localeCompare(b.studentId));
     setStudents(list);
     setLoading(false);
@@ -189,7 +188,7 @@ export default function TeacherPage() {
         <div className="bg-white rounded-lg shadow-md divide-y divide-gray-100 mb-4">
           {students.length === 0 && (
             <p className="text-sm text-gray-400 p-4 text-center">
-              No students found for group {teacherId} in {semester} semester.
+              No students found for {semester} semester.
             </p>
           )}
           {students.map((s) => {
