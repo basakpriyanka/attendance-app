@@ -1,6 +1,6 @@
 {
-  "name": "Campus Attendance",
-  "short_name": "Attendance",
+  "name": "MEC Attendance",
+  "short_name": "MEC Attendance",
   "description": "Attendance tracking for students and teachers",
   "start_url": "/",
   "display": "standalone",

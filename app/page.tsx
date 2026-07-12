@@ -89,10 +89,10 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
         <h1 className="text-2xl font-bold mb-1 text-center text-gray-800">
-          Campus Attendance
+          Mymensingh Engineering College
         </h1>
         <p className="text-sm text-gray-500 text-center mb-6">
-          Sign in with your ID
+          Attendance Portal &middot; Sign in with your ID
         </p>
 
         {/* Role toggle */}
