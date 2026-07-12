@@ -134,7 +134,7 @@ export default function TeacherPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
         Loading students...
       </div>
     );
@@ -145,12 +145,12 @@ export default function TeacherPage() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <div className="min-h-screen bg-gray-950 px-4 py-8">
       <div className="max-w-xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Hi, {name}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-bold text-gray-100">Hi, {name}</h1>
+            <p className="text-sm text-gray-400">
               {semester} semester &middot; {subject} &middot; Group {teacherId}
             </p>
           </div>
@@ -162,21 +162,21 @@ export default function TeacherPage() {
           </button>
         </div>
 
-        <p className="text-xs text-gray-400 mb-3">
+        <p className="text-xs text-gray-500 mb-3">
           To mark a different semester or subject, log out and log back in
           with the new selection.
         </p>
 
         {/* Date selector */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+        <div className="bg-gray-800 rounded-lg shadow-md p-4 mb-4">
+          <label className="block text-xs font-medium text-gray-400 mb-1">
             Date
           </label>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm"
+            className="w-full border border-gray-600 rounded-md px-2 py-2 text-sm bg-gray-700 text-gray-100"
           />
         </div>
 
@@ -184,19 +184,19 @@ export default function TeacherPage() {
         <div className="flex justify-between items-center mb-3">
           <button
             onClick={markAllPresent}
-            className="text-sm bg-green-100 text-green-700 px-3 py-1.5 rounded-md hover:bg-green-200"
+            className="text-sm bg-green-900 text-green-300 px-3 py-1.5 rounded-md hover:bg-green-800"
           >
             Mark all present
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-400">
             {presentCount}/{students.length} marked present
           </span>
         </div>
 
         {/* Student list */}
-        <div className="bg-white rounded-lg shadow-md divide-y divide-gray-100 mb-4">
+        <div className="bg-gray-800 rounded-lg shadow-md divide-y divide-gray-700 mb-4">
           {students.length === 0 && (
-            <p className="text-sm text-gray-400 p-4 text-center">
+            <p className="text-sm text-gray-500 p-4 text-center">
               No students found for {semester} semester.
             </p>
           )}
@@ -210,18 +210,18 @@ export default function TeacherPage() {
                 className="w-full flex justify-between items-center px-4 py-3 text-left"
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-sm font-medium text-gray-100">
                     {s.name}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-500">
                     Roll: {s.studentId} &middot; Reg: {s.regNo}
                   </p>
                 </div>
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${
                     isPresent
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
+                      ? "bg-green-900 text-green-300"
+                      : "bg-red-900 text-red-300"
                   }`}
                 >
                   {isPresent ? "Present" : "Absent"}
@@ -240,7 +240,7 @@ export default function TeacherPage() {
         </button>
 
         {savedMessage && (
-          <p className="text-center text-sm text-gray-600 mt-3">
+          <p className="text-center text-sm text-gray-300 mt-3">
             {savedMessage}
           </p>
         )}

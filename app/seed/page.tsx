@@ -113,12 +113,12 @@ export default function SeedPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
-        <h1 className="text-lg font-bold mb-2 text-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-md max-w-md w-full text-center">
+        <h1 className="text-lg font-bold mb-2 text-gray-100">
           Seed Class Data
         </h1>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-gray-400 mb-4">
           Click below to add your class's students and teachers to the
           database. Safe to click again later if you update the list.
         </p>
@@ -129,10 +129,10 @@ export default function SeedPage() {
         >
           {running ? "Adding..." : "Seed Class Data"}
         </button>
-        {status && <p className="text-sm text-gray-600 mt-4">{status}</p>}
+        {status && <p className="text-sm text-gray-300 mt-4">{status}</p>}
 
-        <div className="text-left mt-6 text-xs text-gray-400 border-t pt-4">
-          <p className="font-medium text-gray-500 mb-1">Login info:</p>
+        <div className="text-left mt-6 text-xs text-gray-500 border-t pt-4">
+          <p className="font-medium text-gray-400 mb-1">Login info:</p>
           <p>Student: your Roll number, password: student123</p>
           <p>Teacher: your group code (e.g. AR, RAC, OZ...), password: teacher123</p>
         </div>

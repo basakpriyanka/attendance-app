@@ -86,8 +86,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-sm">
         <div className="flex justify-center mb-4">
           <img
             src="/icon-512.png"
@@ -95,22 +95,22 @@ export default function LoginPage() {
             className="w-20 h-20 rounded-full"
           />
         </div>
-        <h1 className="text-2xl font-bold mb-1 text-center text-gray-800">
+        <h1 className="text-2xl font-bold mb-1 text-center text-gray-100">
           Mymensingh Engineering College
         </h1>
-        <p className="text-sm text-gray-500 text-center mb-6">
+        <p className="text-sm text-gray-400 text-center mb-6">
           Attendance Portal &middot; Sign in with your ID
         </p>
 
         {/* Role toggle */}
-        <div className="flex mb-5 bg-gray-100 rounded-md p-1">
+        <div className="flex mb-5 bg-gray-700 rounded-md p-1">
           <button
             type="button"
             onClick={() => setRole("student")}
             className={`flex-1 text-sm py-1.5 rounded-md transition ${
               role === "student"
-                ? "bg-white shadow text-gray-800 font-medium"
-                : "text-gray-500"
+                ? "bg-blue-600 shadow text-white font-medium"
+                : "text-gray-400"
             }`}
           >
             Student
@@ -120,8 +120,8 @@ export default function LoginPage() {
             onClick={() => setRole("teacher")}
             className={`flex-1 text-sm py-1.5 rounded-md transition ${
               role === "teacher"
-                ? "bg-white shadow text-gray-800 font-medium"
-                : "text-gray-500"
+                ? "bg-blue-600 shadow text-white font-medium"
+                : "text-gray-400"
             }`}
           >
             Teacher
@@ -130,28 +130,28 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               {role === "student" ? "Roll number" : "Initials (e.g. AR)"}
             </label>
             <input
               type="text"
               value={id}
               onChange={(e) => setId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder={role === "student" ? "e.g. 220301" : "e.g. AR"}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-200 mb-1">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter password"
               required
             />
@@ -160,13 +160,13 @@ export default function LoginPage() {
           {role === "teacher" && (
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-200 mb-1">
                   Semester
                 </label>
                 <select
                   value={semester}
                   onChange={(e) => setSemester(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm"
+                  className="w-full border border-gray-600 rounded-md px-2 py-2 text-sm bg-gray-700 text-gray-100"
                 >
                   {SEMESTERS.map((s) => (
                     <option key={s} value={s}>
@@ -176,13 +176,13 @@ export default function LoginPage() {
                 </select>
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-200 mb-1">
                   Subject
                 </label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm"
+                  className="w-full border border-gray-600 rounded-md px-2 py-2 text-sm bg-gray-700 text-gray-100"
                 >
                   {SUBJECTS.map((s) => (
                     <option key={s} value={s}>
@@ -195,7 +195,7 @@ export default function LoginPage() {
           )}
 
           {error && (
-            <p className="text-red-600 text-sm text-center">{error}</p>
+            <p className="text-red-400 text-sm text-center">{error}</p>
           )}
 
           <button

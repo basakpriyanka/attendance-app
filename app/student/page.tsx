@@ -104,19 +104,19 @@ export default function StudentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
         Loading your attendance...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <div className="min-h-screen bg-gray-950 px-4 py-8">
       <div className="max-w-xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Hi, {name}</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-bold text-gray-100">Hi, {name}</h1>
+            <p className="text-sm text-gray-400">
               Roll: {studentId} &middot; Reg: {regNo}
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function StudentPage() {
         </div>
 
         {subjectCards.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-500">
             No attendance recorded yet.
           </p>
         ) : (
@@ -152,21 +152,21 @@ export default function StudentPage() {
                 subjectCards.every((c) => c.eligible);
 
               return (
-                <div className="bg-white rounded-lg shadow-md p-5 mb-6">
+                <div className="bg-gray-800 rounded-lg shadow-md p-5 mb-6">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-400">
                         Overall attendance
                       </p>
-                      <p className="text-3xl font-bold text-gray-800">
+                      <p className="text-3xl font-bold text-gray-100">
                         {overallPercentage}%
                       </p>
                     </div>
                     <span
                       className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
                         overallEligible
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-green-900 text-green-300"
+                          : "bg-red-900 text-red-300"
                       }`}
                     >
                       {overallEligible
@@ -175,7 +175,7 @@ export default function StudentPage() {
                     </span>
                   </div>
                   {!overallEligible && (
-                    <p className="text-xs text-red-500 mt-2">
+                    <p className="text-xs text-red-400 mt-2">
                       You're below 60% in at least one subject. Check the
                       breakdown below.
                     </p>
@@ -189,15 +189,15 @@ export default function StudentPage() {
               return (
                 <div
                   key={card.key}
-                  className="bg-white rounded-lg shadow-sm border border-gray-100"
+                  className="bg-gray-800 rounded-lg shadow-sm border border-gray-700"
                 >
                   <button
                     onClick={() => setExpanded(isExpanded ? null : card.key)}
                     className="w-full flex justify-between items-center p-4 text-left"
                   >
                     <div>
-                      <p className="font-medium text-gray-800">{card.key}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="font-medium text-gray-100">{card.key}</p>
+                      <p className="text-xs text-gray-500">
                         {card.presentCount}/{card.totalClasses} classes attended
                       </p>
                     </div>
@@ -205,23 +205,23 @@ export default function StudentPage() {
                       <span
                         className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${
                           card.eligible
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-green-900 text-green-300"
+                            : "bg-red-900 text-red-300"
                         }`}
                       >
                         {card.percentage}% &middot;{" "}
                         {card.eligible ? "Eligible" : "Not eligible"}
                       </span>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-500 text-sm">
                         {isExpanded ? "▲" : "▼"}
                       </span>
                     </div>
                   </button>
 
                   {isExpanded && (
-                    <div className="border-t border-gray-100 px-4 py-3">
+                    <div className="border-t border-gray-700 px-4 py-3">
                       {card.history.length === 0 ? (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-500">
                           No classes recorded yet.
                         </p>
                       ) : (
@@ -231,14 +231,14 @@ export default function StudentPage() {
                               key={idx}
                               className="flex justify-between text-sm"
                             >
-                              <span className="text-gray-600">
+                              <span className="text-gray-300">
                                 {entry.date}
                               </span>
                               <span
                                 className={
                                   entry.status === "present"
-                                    ? "text-green-600"
-                                    : "text-red-600"
+                                    ? "text-green-400"
+                                    : "text-red-400"
                                 }
                               >
                                 {entry.status === "present"
