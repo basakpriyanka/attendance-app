@@ -88,6 +88,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+        <div className="flex justify-center mb-4">
+          <img
+            src="/icon-512.png"
+            alt="Mymensingh Engineering College logo"
+            className="w-20 h-20 rounded-full"
+          />
+        </div>
         <h1 className="text-2xl font-bold mb-1 text-center text-gray-800">
           Mymensingh Engineering College
         </h1>
