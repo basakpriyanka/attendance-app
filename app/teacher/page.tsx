@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc, getDoc, deleteDoc, query, where } from "firebase/firestore";
+import { ELIGIBILITY_THRESHOLD } from "@/lib/constants";
 
 function todayString() {
   const d = new Date();
@@ -35,6 +36,7 @@ export default function TeacherPage() {
   const [addMessage, setAddMessage] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -186,6 +188,72 @@ export default function TeacherPage() {
       setAddMessage("Something went wrong while deleting this student.");
     }
     setDeleting(false);
+  }
+
+  async function handleExportNotEligible() {
+    setExporting(true);
+    try {
+      const attendanceQuery = query(
+        collection(db, "attendance"),
+        where("teacherId", "==", teacherId),
+        where("semester", "==", semester),
+        where("subject", "==", subject)
+      );
+      const snapshot = await getDocs(attendanceQuery);
+      const allRecords = snapshot.docs.map((d) => d.data());
+
+      const rows = students.map((s) => {
+        let total = 0;
+        let present = 0;
+        allRecords.forEach((r: any) => {
+          const status = r.records ? r.records[s.studentId] : undefined;
+          if (status === "present" || status === "absent") {
+            total += 1;
+            if (status === "present") present += 1;
+          }
+        });
+        const percentage =
+          total === 0 ? 100 : Math.round((present / total) * 100);
+        return {
+          roll: s.studentId,
+          reg: s.regNo || "",
+          name: s.name,
+          percentage,
+          eligible: percentage >= ELIGIBILITY_THRESHOLD,
+        };
+      });
+
+      const notEligible = rows.filter((r) => !r.eligible);
+
+      if (notEligible.length === 0) {
+        setAddMessage("Everyone is eligible -- nothing to export.");
+        setExporting(false);
+        return;
+      }
+
+      const header = "Roll,Registration No,Name,Attendance %,Status\n";
+      const csvBody = notEligible
+        .map(
+          (r) =>
+            `${r.roll},${r.reg},"${r.name}",${r.percentage}%,Not Eligible`
+        )
+        .join("\n");
+      const csvContent = header + csvBody;
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `not-eligible_${semester}_${subject}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      setAddMessage("Something went wrong while exporting.");
+    }
+    setExporting(false);
   }
 
   if (loading) {
@@ -417,6 +485,16 @@ export default function TeacherPage() {
             {savedMessage}
           </p>
         )}
+
+        <button
+          onClick={handleExportNotEligible}
+          disabled={exporting || students.length === 0}
+          className="w-full mt-3 bg-gray-700 text-gray-200 py-2.5 rounded-md hover:bg-gray-600 transition disabled:opacity-50 text-sm"
+        >
+          {exporting
+            ? "Preparing spreadsheet..."
+            : `Export not-eligible list (${semester} - ${subject})`}
+        </button>
       </div>
     </div>
   );
