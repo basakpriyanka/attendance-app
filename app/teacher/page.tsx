@@ -26,6 +26,14 @@ export default function TeacherPage() {
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
 
+  // "Add student" form state
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newRoll, setNewRoll] = useState("");
+  const [newReg, setNewReg] = useState("");
+  const [newName, setNewName] = useState("");
+  const [addingStudent, setAddingStudent] = useState(false);
+  const [addMessage, setAddMessage] = useState("");
+
   useEffect(() => {
     const role = localStorage.getItem("userRole");
     const id = localStorage.getItem("userId");
@@ -132,6 +140,39 @@ export default function TeacherPage() {
     router.push("/");
   }
 
+  async function handleAddStudent(e: React.FormEvent) {
+    e.preventDefault();
+    const roll = newRoll.trim();
+    const reg = newReg.trim();
+    const studentName = newName.trim();
+
+    if (!roll || !studentName) {
+      setAddMessage("Roll number and name are required.");
+      return;
+    }
+
+    setAddingStudent(true);
+    setAddMessage("");
+    try {
+      await setDoc(doc(db, "students", roll), {
+        studentId: roll,
+        regNo: reg,
+        name: studentName,
+        semester,
+      });
+      setAddMessage(`Added ${studentName} (Roll ${roll}).`);
+      setNewRoll("");
+      setNewReg("");
+      setNewName("");
+      // Refresh the list so the new student shows up immediately
+      await loadStudents(teacherId, semester);
+    } catch (err) {
+      console.error(err);
+      setAddMessage("Something went wrong while adding this student.");
+    }
+    setAddingStudent(false);
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
@@ -178,6 +219,90 @@ export default function TeacherPage() {
             onChange={(e) => setDate(e.target.value)}
             className="w-full border border-gray-600 rounded-md px-2 py-2 text-sm bg-gray-700 text-gray-100"
           />
+        </div>
+
+        {/* Add student form */}
+        <div className="bg-gray-800 rounded-lg shadow-md mb-4">
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="w-full flex justify-between items-center p-4 text-left"
+          >
+            <span className="text-sm font-medium text-gray-200">
+              + Add a student to {semester} semester
+            </span>
+            <span className="text-gray-500 text-sm">
+              {showAddForm ? "▲" : "▼"}
+            </span>
+          </button>
+
+          {showAddForm && (
+            <form
+              onSubmit={handleAddStudent}
+              className="border-t border-gray-700 p-4 space-y-3"
+            >
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                    Roll number
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoll}
+                    onChange={(e) => setNewRoll(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g. 220370"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                    Registration no.
+                  </label>
+                  <input
+                    type="text"
+                    value={newReg}
+                    onChange={(e) => setNewReg(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="optional"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1">
+                  Full name
+                </label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g. Rahim Uddin"
+                  required
+                />
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Will be added to {semester} semester. The student can then
+                log in with this roll number and the shared student
+                password.
+              </p>
+
+              <button
+                type="submit"
+                disabled={addingStudent}
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 text-sm"
+              >
+                {addingStudent ? "Adding..." : "Add student"}
+              </button>
+
+              {addMessage && (
+                <p className="text-xs text-center text-gray-400">
+                  {addMessage}
+                </p>
+              )}
+            </form>
+          )}
         </div>
 
         {/* Mark all present + live count */}
