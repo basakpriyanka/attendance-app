@@ -205,7 +205,7 @@ export default function TeacherPage() {
                     {s.name}
                   </p>
                   <p className="text-xs text-gray-400">
-                    Roll: {s.studentId} &middot; {s.group}
+                    Roll: {s.studentId} &middot; Reg: {s.regNo}
                   </p>
                 </div>
                 <span

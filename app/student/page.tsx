@@ -10,7 +10,7 @@ export default function StudentPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [studentId, setStudentId] = useState("");
-  const [group, setGroup] = useState("");
+  const [regNo, setRegNo] = useState("");
   const [loading, setLoading] = useState(true);
   const [subjectCards, setSubjectCards] = useState<any[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -43,9 +43,9 @@ export default function StudentPage() {
     }
 
     const studentData = studentSnapshot.docs[0].data();
-    const studentGroup = studentData.group || "";
+    const studentRegNo = studentData.regNo || "";
+    setRegNo(studentRegNo);
     const studentSemester = studentData.semester || "";
-    setGroup(studentGroup);
 
     // Every attendance session held for this student's semester --
     // regardless of which teacher ran it -- may include this student.
@@ -117,7 +117,7 @@ export default function StudentPage() {
           <div>
             <h1 className="text-xl font-bold text-gray-800">Hi, {name}</h1>
             <p className="text-sm text-gray-500">
-              Roll: {studentId} &middot; Group: {group}
+              Roll: {studentId} &middot; Reg: {regNo}
             </p>
           </div>
           <button
