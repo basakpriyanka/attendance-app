@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
-import { SUBJECTS } from "@/lib/constants";
 
 function todayString() {
   const d = new Date();
@@ -17,51 +16,66 @@ function todayString() {
 export default function TeacherPage() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [teacherId, setTeacherId] = useState("");
+  const [semester, setSemester] = useState("");
+  const [subject, setSubject] = useState("");
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<any[]>([]);
-  const [subject, setSubject] = useState(SUBJECTS[0]);
   const [date, setDate] = useState(todayString());
-  // statusMap: { studentId: "present" | "absent" }
   const [statusMap, setStatusMap] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
+    const id = localStorage.getItem("userId");
     const storedName = localStorage.getItem("userName");
+    const storedSemester = localStorage.getItem("userSemester");
+    const storedSubject = localStorage.getItem("userSubject");
 
-    if (role !== "teacher") {
+    if (role !== "teacher" || !id || !storedSemester || !storedSubject) {
       router.push("/");
       return;
     }
+    setTeacherId(id);
     setName(storedName || "");
-    loadStudents();
+    setSemester(storedSemester);
+    setSubject(storedSubject);
+    loadStudents(id, storedSemester);
   }, []);
 
   useEffect(() => {
-    if (students.length > 0) {
-      loadExistingAttendance(subject, date);
+    if (students.length > 0 && teacherId && semester && subject) {
+      loadExistingAttendance(teacherId, semester, subject, date);
     }
-  }, [subject, date, students]);
+  }, [date, students]);
 
-  async function loadStudents() {
+  // Students whose group ends with this teacher's code AND whose
+  // semester matches the one chosen at login.
+  async function loadStudents(code: string, sem: string) {
     const snapshot = await getDocs(collection(db, "students"));
-    const list = snapshot.docs.map((d) => d.data());
-    list.sort((a, b) => a.studentId.localeCompare(b.studentId));
+    const list = snapshot.docs
+      .map((d) => d.data())
+      .filter(
+        (s: any) => s.group && s.group.endsWith("." + code) && s.semester === sem
+      );
+    list.sort((a: any, b: any) => a.studentId.localeCompare(b.studentId));
     setStudents(list);
     setLoading(false);
   }
 
-  // If attendance for this subject+date was already marked earlier today,
-  // load it so the teacher can review/edit instead of starting blank.
-  async function loadExistingAttendance(subj: string, dt: string) {
-    const docId = `${subj}_${dt}`;
+  async function loadExistingAttendance(
+    code: string,
+    sem: string,
+    subj: string,
+    dt: string
+  ) {
+    const docId = `${code}_${sem}_${subj}_${dt}`;
     const existing = await getDoc(doc(db, "attendance", docId));
 
     if (existing.exists()) {
       setStatusMap(existing.data().records || {});
     } else {
-      // Default: mark everyone present, teacher only taps the absentees
       const defaults: Record<string, string> = {};
       students.forEach((s) => {
         defaults[s.studentId] = "present";
@@ -88,9 +102,11 @@ export default function TeacherPage() {
 
   async function handleSubmit() {
     setSaving(true);
-    const docId = `${subject}_${date}`;
+    const docId = `${teacherId}_${semester}_${subject}_${date}`;
     try {
       await setDoc(doc(db, "attendance", docId), {
+        teacherId,
+        semester,
         subject,
         date,
         records: statusMap,
@@ -126,7 +142,9 @@ export default function TeacherPage() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-xl font-bold text-gray-800">Hi, {name}</h1>
-            <p className="text-sm text-gray-500">Mark attendance</p>
+            <p className="text-sm text-gray-500">
+              {semester} semester &middot; {subject} &middot; Group {teacherId}
+            </p>
           </div>
           <button
             onClick={handleLogout}
@@ -136,35 +154,22 @@ export default function TeacherPage() {
           </button>
         </div>
 
-        {/* Subject + date selectors */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex gap-3">
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">
-              Subject
-            </label>
-            <select
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm"
-            >
-              {SUBJECTS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">
-              Date
-            </label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm"
-            />
-          </div>
+        <p className="text-xs text-gray-400 mb-3">
+          To mark a different semester or subject, log out and log back in
+          with the new selection.
+        </p>
+
+        {/* Date selector */}
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+          <label className="block text-xs font-medium text-gray-500 mb-1">
+            Date
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm"
+          />
         </div>
 
         {/* Mark all present + live count */}
@@ -182,6 +187,11 @@ export default function TeacherPage() {
 
         {/* Student list */}
         <div className="bg-white rounded-lg shadow-md divide-y divide-gray-100 mb-4">
+          {students.length === 0 && (
+            <p className="text-sm text-gray-400 p-4 text-center">
+              No students found for group {teacherId} in {semester} semester.
+            </p>
+          )}
           {students.map((s) => {
             const status = statusMap[s.studentId] || "present";
             const isPresent = status === "present";
@@ -195,7 +205,9 @@ export default function TeacherPage() {
                   <p className="text-sm font-medium text-gray-800">
                     {s.name}
                   </p>
-                  <p className="text-xs text-gray-400">ID: {s.studentId}</p>
+                  <p className="text-xs text-gray-400">
+                    Roll: {s.studentId} &middot; {s.group}
+                  </p>
                 </div>
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${
@@ -213,7 +225,7 @@ export default function TeacherPage() {
 
         <button
           onClick={handleSubmit}
-          disabled={saving}
+          disabled={saving || students.length === 0}
           className="w-full bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save attendance"}
