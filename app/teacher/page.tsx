@@ -38,6 +38,12 @@ export default function TeacherPage() {
   const [deleting, setDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
 
+  // Registration link generation
+  const [linkExpiry, setLinkExpiry] = useState("");
+  const [generatedLink, setGeneratedLink] = useState("");
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [linkMessage, setLinkMessage] = useState("");
+
   useEffect(() => {
     const role = localStorage.getItem("userRole");
     const id = localStorage.getItem("userId");
@@ -256,6 +262,51 @@ export default function TeacherPage() {
     setExporting(false);
   }
 
+  function randomCode(length = 6) {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I confusion
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+  }
+
+  async function handleGenerateLink() {
+    if (!linkExpiry) {
+      setLinkMessage("Please pick a deadline first.");
+      return;
+    }
+    const expiryDate = new Date(linkExpiry);
+    if (expiryDate.getTime() <= Date.now()) {
+      setLinkMessage("Deadline must be in the future.");
+      return;
+    }
+
+    setGeneratingLink(true);
+    setLinkMessage("");
+    try {
+      const code = randomCode();
+      await setDoc(doc(db, "registrationLinks", code), {
+        code,
+        teacherId,
+        semester,
+        expiresAt: expiryDate.toISOString(),
+        createdAt: new Date().toISOString(),
+      });
+      const link = `${window.location.origin}/register/${code}`;
+      setGeneratedLink(link);
+    } catch (err) {
+      console.error(err);
+      setLinkMessage("Something went wrong while generating the link.");
+    }
+    setGeneratingLink(false);
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(generatedLink);
+    setLinkMessage("Copied to clipboard!");
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
@@ -302,6 +353,52 @@ export default function TeacherPage() {
             onChange={(e) => setDate(e.target.value)}
             className="w-full border border-gray-600 rounded-md px-2 py-2 text-sm bg-gray-700 text-gray-100"
           />
+        </div>
+
+        {/* Self-registration link generator */}
+        <div className="bg-gray-800 rounded-lg shadow-md p-4 mb-4">
+          <p className="text-sm font-medium text-gray-200 mb-2">
+            Student self-registration link
+          </p>
+          <p className="text-xs text-gray-500 mb-3">
+            Students can use this link to add themselves to {semester}{" "}
+            semester until the deadline you set. After it expires, you can
+            still add or remove students manually below.
+          </p>
+
+          <div className="flex gap-2 mb-3">
+            <input
+              type="datetime-local"
+              value={linkExpiry}
+              onChange={(e) => setLinkExpiry(e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={handleGenerateLink}
+              disabled={generatingLink}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 text-sm whitespace-nowrap"
+            >
+              {generatingLink ? "Generating..." : "Generate link"}
+            </button>
+          </div>
+
+          {generatedLink && (
+            <div className="flex gap-2 items-center bg-gray-700 rounded-md px-3 py-2">
+              <span className="text-xs text-gray-200 truncate flex-1">
+                {generatedLink}
+              </span>
+              <button
+                onClick={copyLink}
+                className="text-xs bg-gray-600 text-gray-200 px-2 py-1 rounded hover:bg-gray-500 whitespace-nowrap"
+              >
+                Copy
+              </button>
+            </div>
+          )}
+
+          {linkMessage && (
+            <p className="text-xs text-gray-400 mt-2">{linkMessage}</p>
+          )}
         </div>
 
         {/* Add student form */}
