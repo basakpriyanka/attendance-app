@@ -73,7 +73,16 @@ export default function TeacherPage() {
     const existing = await getDoc(doc(db, "attendance", docId));
 
     if (existing.exists()) {
-      setStatusMap(existing.data().records || {});
+      const savedRecords = existing.data().records || {};
+      // Backfill any student not in the saved record (e.g. newly
+      // added students) as "present" by default.
+      const merged: Record<string, string> = { ...savedRecords };
+      students.forEach((s) => {
+        if (!merged[s.studentId]) {
+          merged[s.studentId] = "present";
+        }
+      });
+      setStatusMap(merged);
     } else {
       const defaults: Record<string, string> = {};
       students.forEach((s) => {
