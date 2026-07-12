@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
 function todayString() {
   const d = new Date();
@@ -33,6 +33,8 @@ export default function TeacherPage() {
   const [newName, setNewName] = useState("");
   const [addingStudent, setAddingStudent] = useState(false);
   const [addMessage, setAddMessage] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -171,6 +173,19 @@ export default function TeacherPage() {
       setAddMessage("Something went wrong while adding this student.");
     }
     setAddingStudent(false);
+  }
+
+  async function handleDeleteStudent(rollNumber: string) {
+    setDeleting(true);
+    try {
+      await deleteDoc(doc(db, "students", rollNumber));
+      setConfirmDeleteId(null);
+      await loadStudents(teacherId, semester);
+    } catch (err) {
+      console.error(err);
+      setAddMessage("Something went wrong while deleting this student.");
+    }
+    setDeleting(false);
   }
 
   if (loading) {
@@ -328,30 +343,63 @@ export default function TeacherPage() {
           {students.map((s) => {
             const status = statusMap[s.studentId] || "present";
             const isPresent = status === "present";
+            const isConfirming = confirmDeleteId === s.studentId;
             return (
-              <button
+              <div
                 key={s.studentId}
-                onClick={() => toggleStudent(s.studentId)}
-                className="w-full flex justify-between items-center px-4 py-3 text-left"
+                className="w-full flex justify-between items-center px-4 py-3"
               >
-                <div>
+                <button
+                  onClick={() => toggleStudent(s.studentId)}
+                  className="flex-1 text-left"
+                >
                   <p className="text-sm font-medium text-gray-100">
                     {s.name}
                   </p>
                   <p className="text-xs text-gray-500">
                     Roll: {s.studentId} &middot; Reg: {s.regNo}
                   </p>
-                </div>
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                    isPresent
-                      ? "bg-green-900 text-green-300"
-                      : "bg-red-900 text-red-300"
-                  }`}
-                >
-                  {isPresent ? "Present" : "Absent"}
-                </span>
-              </button>
+                </button>
+
+                {isConfirming ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">Delete?</span>
+                    <button
+                      onClick={() => handleDeleteStudent(s.studentId)}
+                      disabled={deleting}
+                      className="text-xs bg-red-900 text-red-300 px-2 py-1 rounded-md hover:bg-red-800 disabled:opacity-50"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-md hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleStudent(s.studentId)}
+                      className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                        isPresent
+                          ? "bg-green-900 text-green-300"
+                          : "bg-red-900 text-red-300"
+                      }`}
+                    >
+                      {isPresent ? "Present" : "Absent"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(s.studentId)}
+                      className="text-xs text-gray-500 hover:text-red-400 px-1"
+                      title="Delete student"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
